@@ -11,22 +11,18 @@ export default function App() {
   const [resultado, setResultado] = useState(null);
   const simuladorRef = useRef(null);
 
-  // Inventário atualizado com os 8 anteriores + 6 novos populares
+  // Inventário atualizado
   const carInventory = [
     { id: 1, nome: "Honda Civic G10", ano: "2020", preco: 115900, tipo: "Sedan", combustivel: "Flex", cambio: "Automático", tag: "Estoque Premium" },
     { id: 2, nome: "Toyota Corolla XEi", ano: "2019", preco: 108500, tipo: "Sedan", combustivel: "Flex", cambio: "Automático", tag: "Destaque" },
     { id: 3, nome: "Volkswagen T-Cross", ano: "2021", preco: 112000, tipo: "SUV", combustivel: "Turbo Flex", cambio: "Automático", tag: "Aprovação Facilitada" },
     { id: 4, nome: "Chevrolet Onix Plus", ano: "2022", preco: 89900, tipo: "Sedan", combustivel: "Turbo Flex", cambio: "Automático", tag: "Baixa KM" },
-    
-    // --- NOVOS POPULARES (25k a 50k) ---
     { id: 9, nome: "Volkswagen Gol G6", ano: "2015", preco: 38900, tipo: "Hatch", combustivel: "Flex", cambio: "Manual", tag: "Oferta da Semana" },
     { id: 10, nome: "Fiat Palio Attractive", ano: "2014", preco: 34500, tipo: "Hatch", combustivel: "Flex", cambio: "Manual", tag: "Baixa Entrada" },
     { id: 11, nome: "Hyundai HB20 Comfort", ano: "2015", preco: 46900, tipo: "Hatch", combustivel: "Flex", cambio: "Manual", tag: "Mais Vendido" },
     { id: 12, nome: "Ford Ka SE 1.0", ano: "2017", preco: 42000, tipo: "Hatch", combustivel: "Flex", cambio: "Manual", tag: "Super Econômico" },
     { id: 13, nome: "Renault Sandero Stepway", ano: "2014", preco: 37800, tipo: "Hatch", combustivel: "Flex", cambio: "Manual", tag: "Oportunidade" },
     { id: 14, nome: "Chevrolet Celta LT", ano: "2013", preco: 28500, tipo: "Hatch", combustivel: "Flex", cambio: "Manual", tag: "Aprovação Imediata" },
-    // -----------------------------------
-
     { id: 5, nome: "Hyundai HB20S", ano: "2021", preco: 78900, tipo: "Sedan", combustivel: "Flex", cambio: "Automático", tag: "Elegante" },
     { id: 6, nome: "Jeep Renegade", ano: "2020", preco: 98500, tipo: "SUV", combustivel: "Flex", cambio: "Automático", tag: "Pronta Entrega" },
     { id: 7, nome: "Fiat Argo Drive", ano: "2022", preco: 69900, tipo: "Hatch", combustivel: "Flex", cambio: "Manual", tag: "Garantia de Fábrica" },
@@ -49,9 +45,14 @@ export default function App() {
     setResultado({ parcela: valorParcela.toFixed(2), entrada: dados.entrada || 0 });
   };
 
+  // Número atualizado conforme seu pedido
   const enviarWhatsApp = () => {
     const msg = `Olá Alfa Motors! Quero simular o ${selectedCar.nome} (${selectedCar.ano}). Entrada de R$${resultado.entrada} e parcelas de R$${resultado.parcela}.`;
-    window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://wa.me/5511958071871?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const contatoGeral = () => {
+    window.open(`https://wa.me/5511958071871?text=Olá! Vim pelo site e gostaria de falar com um consultor.`, '_blank');
   };
 
   return (
@@ -59,7 +60,12 @@ export default function App() {
       {/* NAVBAR */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 5%', background: '#000', borderBottom: `1px solid rgba(245, 158, 11, 0.3)`, position: 'fixed', width: '100%', top: 0, zIndex: 1000, boxSizing: 'border-box', backdropFilter: 'blur(10px)' }}>
         <h2 style={{ margin: 0, fontWeight: '900', fontStyle: 'italic' }}>ALFA <span style={{ color: gold }}>MOTORS</span></h2>
-        <button style={{ background: 'transparent', color: gold, border: `1px solid ${gold}`, padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold' }}>CONTATO</button>
+        {/* BOTÃO DE CONTATO ATUALIZADO */}
+        <button 
+          onClick={contatoGeral}
+          style={{ background: gold, color: 'black', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+          CONTATO WHATSAPP
+        </button>
       </nav>
 
       {/* HERO SECTION */}
