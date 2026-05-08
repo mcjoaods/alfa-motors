@@ -135,30 +135,57 @@ export default function App() {
         ))}
       </section>
 
+      // ... (mantenha o restante do código igual)
+
       {/* SIMULADOR */}
       <section ref={simuladorRef} style={{ padding: '80px 5%' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto', background: cardBg, padding: '45px', borderRadius: '35px', border: '1px solid #1a1a1a', textAlign: 'center' }}>
           <h2 style={{ marginBottom: '10px' }}>Simular <span style={{ color: gold }}>Crédito</span></h2>
           <p style={{ color: gold, fontWeight: 'bold' }}>{selectedCar.nome}</p>
+          
           <form onSubmit={calcularFinanciamento} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '25px' }}>
-            <input required placeholder="R$ 0,00 (Entrada)" style={inputStyle} value={dadosSimulacao.entrada} onChange={e => setDadosSimulacao({...dadosSimulacao, entrada: formatMoedaInput(e.target.value)})} />
-            <select style={inputStyle} value={dadosSimulacao.parcelas} onChange={e => setDadosSimulacao({...dadosSimulacao, parcelas: e.target.value})}>
-              <option value="48">48x Fixas</option>
+            <input 
+              required 
+              placeholder="R$ 0,00 (Entrada)" 
+              style={inputStyle} 
+              value={dadosSimulacao.entrada} 
+              onChange={e => setDadosSimulacao({...dadosSimulacao, entrada: formatMoedaInput(e.target.value)})} 
+            />
+            
+            <select 
+              style={inputStyle} 
+              value={dadosSimulacao.parcelas} 
+              onChange={e => setDadosSimulacao({...dadosSimulacao, parcelas: e.target.value})}
+            >
+              <option value="12">12x Mensais</option>
+              <option value="24">24x Mensais</option>
+              <option value="36">36x Mensais</option>
+              <option value="48">48x Fixas (Recomendado)</option>
               <option value="60">60x Fixas</option>
+              <option value="72">72x Fixas (Plano Estendido)</option>
             </select>
-            <button type="submit" style={{ padding: '18px', background: gold, border: 'none', borderRadius: '12px', fontWeight: '900', cursor: 'pointer', color: '#000' }}>CALCULAR PARCELAS</button>
+            
+            <button type="submit" style={{ padding: '18px', background: gold, border: 'none', borderRadius: '12px', fontWeight: '900', cursor: 'pointer', color: '#000' }}>
+              CALCULAR PARCELAS
+            </button>
           </form>
+
           {resultado && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: '30px', padding: '20px', background: '#080808', borderRadius: '20px', border: `1px solid ${gold}40` }}>
               <p style={{ color: '#666', margin: '0 0 5px 0' }}>Sua parcela estimada:</p>
               <h1 style={{ color: gold, fontSize: '2.5rem', margin: '0 0 15px 0' }}>{resultado.parcela}</h1>
-              <button onClick={() => window.open(`https://wa.me/${selecionarAtendente()}?text=Olá! Gostaria de aprovar o financiamento para o ${selectedCar.nome}. Fiz uma simulação com entrada de ${dadosSimulacao.entrada}.`)} style={{ background: '#25D366', color: '#fff', border: 'none', padding: '15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+              <button 
+                onClick={() => window.open(`https://wa.me/${selecionarAtendente()}?text=Olá! Gostaria de aprovar o financiamento para o ${selectedCar.nome}. Fiz uma simulação em ${dadosSimulacao.parcelas}x com entrada de ${dadosSimulacao.entrada}.`)} 
+                style={{ background: '#25D366', color: '#fff', border: 'none', padding: '15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}
+              >
                 APROVAR NO WHATSAPP
               </button>
             </motion.div>
           )}
         </div>
       </section>
+
+// ... (inventário de carros abaixo)
 
       {/* MODAL RESERVA VIP */}
       <AnimatePresence>
