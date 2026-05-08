@@ -135,8 +135,6 @@ export default function App() {
         ))}
       </section>
 
-      // ... (mantenha o restante do código igual)
-
       {/* SIMULADOR */}
       <section ref={simuladorRef} style={{ padding: '80px 5%' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto', background: cardBg, padding: '45px', borderRadius: '35px', border: '1px solid #1a1a1a', textAlign: 'center' }}>
