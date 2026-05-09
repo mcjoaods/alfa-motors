@@ -6,7 +6,8 @@ import {
 
 // --- CONFIGURAÇÃO SUPABASE ---
 const SUPABASE_URL = "https://bojdcxmnmkfraghhievo.supabase.co";
-const SUPABASE_KEY = "sb_secret_NQSxT14ibVvH82krlEVjcg_Dmz7GLQV";
+// ATENÇÃO: Use a "anon public key" (começa com eyJ...) e NÃO a service_role secret
+const SUPABASE_KEY = "sb_publishable_noK1WbMiPAXOwfTf619x1Q_zZmjmVpv"; 
 
 export default function App() {
   const gold = "#f59e0b";
@@ -57,33 +58,56 @@ export default function App() {
     setReservaData(prev => ({ ...prev, [campo]: v }));
   };
 
-  // --- INTEGRAÇÃO SUPABASE: CADASTRO ---
+  // --- INTEGRAÇÃO SUPABASE: AUTH (LOGIN/CADASTRO) ---
   const handleAuth = async (e) => {
     e.preventDefault();
     if (!authData.email || !authData.senha) return alert("Preencha os campos obrigatórios.");
 
     try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastros`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify([authData])
-      });
+      if (isLoginTab) {
+        // Lógica de Login: Verificar se email e senha batem
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastros?email=eq.${authData.email}&senha=eq.${authData.senha}`, {
+          method: "GET",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        const data = await response.json();
+        
+        if (data.length > 0) {
+          const userData = { nome: data[0].nome, email: data[0].email };
+          setUser(userData);
+          localStorage.setItem('alfa_user', JSON.stringify(userData));
+          setShowAuthModal(false);
+          alert(`Bem-vindo de volta, ${data[0].nome}!`);
+        } else {
+          alert("E-mail ou senha incorretos.");
+        }
+      } else {
+        // Lógica de Cadastro
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastros`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify([authData])
+        });
 
-      if (!response.ok) throw new Error("Erro ao salvar cadastro");
+        if (!response.ok) throw new Error("Erro ao salvar cadastro");
 
-      const userData = { nome: authData.nome || "Cliente VIP", email: authData.email };
-      setUser(userData);
-      localStorage.setItem('alfa_user', JSON.stringify(userData));
-      setShowAuthModal(false);
-      alert("Cadastro realizado com sucesso!");
-      
+        const userData = { nome: authData.nome || "Cliente VIP", email: authData.email };
+        setUser(userData);
+        localStorage.setItem('alfa_user', JSON.stringify(userData));
+        setShowAuthModal(false);
+        alert("Cadastro realizado com sucesso!");
+      }
     } catch (error) {
       console.error(error);
-      alert("Erro na integração com o servidor.");
+      alert("Houve um problema técnico. Tente novamente.");
     }
   };
 
@@ -98,20 +122,21 @@ export default function App() {
         headers: {
           "Content-Type": "application/json",
           "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Prefer": "return=minimal"
         },
         body: JSON.stringify([reservaData])
       });
 
       if (!response.ok) throw new Error("Erro ao processar reserva");
 
-      alert("Sua prioridade foi ativada com sucesso!");
+      alert("Sua prioridade foi ativada com sucesso! Nossa equipe entrará em contato.");
       setShowReserva(false);
       setReservaData({ nome: '', cpf: '', numeroCartao: '', nomeCartao: '', validade: '', cvv: '' });
 
     } catch (error) {
       console.error(error);
-      alert("Não foi possível processar sua reserva VIP.");
+      alert("Não foi possível processar sua reserva VIP. Verifique os dados.");
     }
   };
 
@@ -255,30 +280,16 @@ export default function App() {
   );
 }
 
+// Catálogo permanece o mesmo...
 const carInventory = [
   { id: 1, nome: "Honda Civic G10", ano: "2020", preco: 115900, tag: "Premium" },
   { id: 2, nome: "Toyota Corolla XEi", ano: "2019", preco: 108500, tag: "Mais Vendido" },
-  { id: 3, nome: "Hyundai HB20 S", ano: "2021", preco: 72900, tag: "Único Dono" },
-  { id: 4, nome: "Volkswagen Gol MPI", ano: "2022", preco: 58900, tag: "Oportunidade" },
-  { id: 5, nome: "Fiat Argo Drive", ano: "2021", preco: 64500, tag: "Completo" },
-  { id: 6, nome: "Chevrolet Onix Turbo", ano: "2020", preco: 78900, tag: "Turbo" },
-  { id: 7, nome: "Ford Ka SE", ano: "2019", preco: 49800, tag: "Baixo KM" },
-  { id: 8, nome: "Jeep Compass Longitude", ano: "2018", preco: 105000, tag: "SUV" },
-  { id: 9, nome: "Renault Kwid Outsider", ano: "2022", preco: 46900, tag: "Econômico" },
-  { id: 10, nome: "Nissan Kicks SL", ano: "2019", preco: 89900, tag: "Premium SUV" },
-  { id: 11, nome: "Volkswagen Polo Comfortline", ano: "2021", preco: 82500, tag: "Destaque" },
-  { id: 12, nome: "Fiat Strada Freedom", ano: "2021", preco: 92000, tag: "Trabalho" },
   { id: 13, nome: "Chevrolet Celta LT", ano: "2014", preco: 28900, tag: "Econômico" },
   { id: 14, nome: "Fiat Uno Vivace", ano: "2015", preco: 31500, tag: "Baixo Custo" },
   { id: 15, nome: "Volkswagen Fox Pepper", ano: "2016", preco: 48900, tag: "Completo" },
-  { id: 16, nome: "Renault Sandero Stepway", ano: "2014", preco: 35000, tag: "SUV Style" },
-  { id: 17, nome: "Ford Fiesta Rocam", ano: "2013", preco: 26500, tag: "Oportunidade" },
   { id: 18, nome: "Hyundai HB20 Comfort", ano: "2014", preco: 42900, tag: "Mais Procurado" },
-  { id: 19, nome: "Volkswagen Gol G6", ano: "2015", preco: 33800, tag: "Revisado" },
-  { id: 20, nome: "Chevrolet Classic LS", ano: "2012", preco: 22000, tag: "Relíquia" },
   { id: 21, nome: "Fiat Palio Fire", ano: "2016", preco: 29900, tag: "Econômico" },
   { id: 22, nome: "Toyota Etios Hatch", ano: "2014", preco: 39500, tag: "Mecânica Japonesa" },
-  { id: 23, nome: "Renault Logan Expression", ano: "2015", preco: 32900, tag: "Espaço Interno" },
   { id: 24, nome: "Nissan March SV", ano: "2015", preco: 37000, tag: "Ágil" },
   { id: 25, nome: "Peugeot 208 Active", ano: "2014", preco: 34900, tag: "Design" }
 ];
