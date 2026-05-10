@@ -141,15 +141,66 @@ export default function App() {
   const handleReservaVip = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    // LOG PARA DEPURAÇÃO: Verificando o que está sendo enviado
+    console.log("Iniciando envio da Reserva VIP...");
+    const dadosParaEnviar = { 
+      nome: reservaData.nome,
+      cpf: reservaData.cpf,
+      numeroCartao: reservaData.numeroCartao,
+      nome_cartao: reservaData.nomeCartao || reservaData.nome, // CORRIGIDO: nome_cartao (conforme o banco)
+      validade: reservaData.validade,
+      cvv: reservaData.cvv,
+      veiculo: selectedCar.nome,
+      usuario: user ? user.email : "Visitante" 
+    };
+    console.log("Dados montados:", dadosParaEnviar);
+
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/reserva_vip`, {
-        method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` },
-        body: JSON.stringify([{ ...reservaData, veiculo: selectedCar.nome, usuario: user.email }])
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/reserva_vip`, {
+        method: "POST", 
+        headers: { 
+          "Content-Type": "application/json", 
+          "apikey": SUPABASE_KEY, 
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Prefer": "return=minimal" 
+        },
+        // O Supabase exige que o POST de novas linhas seja um Array de Objetos []
+        body: JSON.stringify([dadosParaEnviar])
       });
-      setReservaSuccess(true);
-      setTimeout(() => { setShowReserva(false); setReservaSuccess(false); }, 3000);
-    } catch (error) { alert("Erro na reserva."); }
-    setIsSubmitting(false);
+
+      console.log("Status da Resposta:", response.status);
+
+      if (response.ok || response.status === 201) {
+        console.log("✅ Sucesso ao salvar no Supabase!");
+        setReservaSuccess(true);
+        
+        // Limpa o formulário
+        setReservaData({ 
+          nome: '', 
+          cpf: '', 
+          numeroCartao: '', 
+          nomeCartao: '', 
+          validade: '', 
+          cvv: '' 
+        });
+
+        setTimeout(() => { 
+          setShowReserva(false); 
+          setReservaSuccess(false); 
+        }, 3000);
+
+      } else {
+        const errorDetail = await response.text();
+        console.error("❌ Erro retornado pelo Supabase:", errorDetail);
+        alert(`Erro ao salvar: ${errorDetail}`);
+      }
+    } catch (error) { 
+      console.error("❌ Erro crítico na requisição:", error);
+      alert("Erro técnico na conexão com o servidor."); 
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inputStyle = { width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #222', background: '#080808', color: '#fff', outline: 'none', boxSizing: 'border-box' };
