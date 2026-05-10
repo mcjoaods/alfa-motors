@@ -282,16 +282,16 @@ export default function App() {
 
 // Catálogo permanece o mesmo...
 const carInventory = [
-  { id: 1, nome: "Honda Civic G10", ano: "2020", preco: 115900, tag: "Premium" },
-  { id: 2, nome: "Toyota Corolla XEi", ano: "2019", preco: 108500, tag: "Mais Vendido" },
-  { id: 13, nome: "Chevrolet Celta LT", ano: "2014", preco: 28900, tag: "Econômico" },
-  { id: 14, nome: "Fiat Uno Vivace", ano: "2015", preco: 31500, tag: "Baixo Custo" },
-  { id: 15, nome: "Volkswagen Fox Pepper", ano: "2016", preco: 48900, tag: "Completo" },
-  { id: 18, nome: "Hyundai HB20 Comfort", ano: "2014", preco: 42900, tag: "Mais Procurado" },
-  { id: 21, nome: "Fiat Palio Fire", ano: "2016", preco: 29900, tag: "Econômico" },
-  { id: 22, nome: "Toyota Etios Hatch", ano: "2014", preco: 39500, tag: "Mecânica Japonesa" },
-  { id: 24, nome: "Nissan March SV", ano: "2015", preco: 37000, tag: "Ágil" },
-  { id: 25, nome: "Peugeot 208 Active", ano: "2014", preco: 34900, tag: "Design" },
+  { id: 1, nome: "Honda Civic G10", ano: "2020", preco: 118900, tag: "Premium" }, // Ajustado (+3k pela valorização do modelo)
+  { id: 2, nome: "Toyota Corolla XEi", ano: "2019", preco: 112000, tag: "Mais Vendido" }, // Ajustado (Corolla subiu um pouco)
+  { id: 13, nome: "Chevrolet Celta LT", ano: "2014", preco: 29500, tag: "Econômico" }, // Ajustado (FIPE subiu)
+  { id: 14, nome: "Fiat Uno Vivace", ano: "2015", preco: 32900, tag: "Baixo Custo" }, // Ajustado
+  { id: 15, nome: "Volkswagen Fox Pepper", ano: "2016", preco: 51500, tag: "Completo" }, // Ajustado (Versão Pepper é valorizada)
+  { id: 18, nome: "Hyundai HB20 Comfort", ano: "2014", preco: 43500, tag: "Mais Procurado" },
+  { id: 21, nome: "Fiat Palio Fire", ano: "2016", preco: 31000, tag: "Econômico" },
+  { id: 22, nome: "Toyota Etios Hatch", ano: "2014", preco: 41000, tag: "Mecânica Japonesa" },
+  { id: 24, nome: "Nissan March SV", ano: "2015", preco: 38500, tag: "Ágil" },
+  { id: 25, nome: "Peugeot 208 Active", ano: "2014", preco: 35900, tag: "Design" },
   { id: 26, nome: "Renault Sandero Stepway", ano: "2015", preco: 44500, tag: "Robusto" },
   { id: 27, nome: "Ford Ka SE 1.0", ano: "2017", preco: 41900, tag: "Econômico" },
   { id: 28, nome: "Chevrolet Onix LTZ", ano: "2016", preco: 52000, tag: "Mais Vendido" },
