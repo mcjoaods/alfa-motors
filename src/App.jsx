@@ -291,5 +291,9 @@ const carInventory = [
   { id: 21, nome: "Fiat Palio Fire", ano: "2016", preco: 29900, tag: "Econômico" },
   { id: 22, nome: "Toyota Etios Hatch", ano: "2014", preco: 39500, tag: "Mecânica Japonesa" },
   { id: 24, nome: "Nissan March SV", ano: "2015", preco: 37000, tag: "Ágil" },
-  { id: 25, nome: "Peugeot 208 Active", ano: "2014", preco: 34900, tag: "Design" }
+  { id: 25, nome: "Peugeot 208 Active", ano: "2014", preco: 34900, tag: "Design" },
+  { id: 26, nome: "Renault Sandero Stepway", ano: "2015", preco: 44500, tag: "Robusto" },
+  { id: 27, nome: "Ford Ka SE 1.0", ano: "2017", preco: 41900, tag: "Econômico" },
+  { id: 28, nome: "Chevrolet Onix LTZ", ano: "2016", preco: 52000, tag: "Mais Vendido" },
+  { id: 29, nome: "Volkswagen Gol G6", ano: "2014", preco: 35800, tag: "Peças Baratas" }
 ];
